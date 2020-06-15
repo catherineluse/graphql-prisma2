@@ -1,9 +1,8 @@
-
 // query {
 //     users {
 //       id
 //       name
-//       createdAt 
+//       createdAt
 //       updatedAt
 //     }
 //   }
@@ -11,10 +10,10 @@
 // query {
 //     users {
 //       name
-//       createdAt 
+//       createdAt
 //       updatedAt
 //       discussions {
-//         title 
+//         title
 //         body
 //       }
 //     }
@@ -25,18 +24,37 @@
 //       name:"Me Again",
 //       email:"catherine.luse@gmail.com"
 //     }){
-//       id 
+//       id
 //       name
 //       email
 //     }
 //   }
 
+async function main() {
+  // ... you will write your Prisma Client queries here
+
+  const newUser = await prisma.user.create({
+    data: {
+      name: "Alice",
+      email: "alice@prisma.io",
+    },
+  });
+  const users = await prisma.user.findMany();
+}
+
+// main()
+//   .catch((e) => {
+//     throw e;
+//   })
+//   .finally(async () => {
+//     await prisma.disconnect();
+//   });
 
 // mutation {
 //     updateUser(
 //       where:{
 //         id:"ck9goq8tv00dy0739w94l8dyi"
-//       }, 
+//       },
 //       data:{
 //         name:"Yours Truly"
 //         email:"catherineluse@gmail.com"
@@ -49,7 +67,7 @@
 
 //   mutation {
 //     deleteUser(where:{id:"ck9f8h8yd000t0748ctwio7vc"}){
-//       id 
+//       id
 //       name
 //     }
 //   }
