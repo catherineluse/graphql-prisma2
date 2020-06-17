@@ -58,6 +58,19 @@ app.post(`/user/:id`, async (req, res) => {
   res.json(updatedUser);
 });
 
+app.post(`/community`, async (req, res) => {
+  const { url, name, description, creatorId } = req.body;
+  const result = await prisma.community.create({
+    data: {
+      Creator: { connect: { id: parseInt(creatorId) } },
+      url,
+      name,
+      description,
+    },
+  });
+  res.json(result);
+});
+
 const server = app.listen(3000, () =>
   console.log(
     "🚀 Server ready at: http://localhost:3000\n⭐️ See sample requests: http://pris.ly/e/ts/rest-express#3-using-the-rest-api"
