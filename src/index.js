@@ -7,7 +7,20 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.post("/user", async (req, res) => {
+app.get("/", async (req, res) => {
+  res.json("The server is running");
+});
+
+// USERS
+
+// Get users
+app.get("/users", async (req, res) => {
+  const users = await prisma.user.findMany();
+  res.json(users);
+});
+
+// Create user
+app.post("/users", async (req, res) => {
   const result = await prisma.user.create({
     data: {
       ...req.body,
@@ -16,12 +29,8 @@ app.post("/user", async (req, res) => {
   res.json(result);
 });
 
-app.get("/user", async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
-});
-
-app.get(`/user/:id`, async (req, res) => {
+// Get user by ID
+app.get(`/users/:id`, async (req, res) => {
   const { id } = req.params;
 
   const userById = await prisma.user.findOne({
@@ -32,18 +41,8 @@ app.get(`/user/:id`, async (req, res) => {
   res.json(userById);
 });
 
-app.delete(`/user/:id`, async (req, res) => {
-  const { id } = req.params;
-
-  const deletedUser = await prisma.user.delete({
-    where: {
-      id: parseInt(id),
-    },
-  });
-  res.json(deletedUser);
-});
-
-app.post(`/user/:id`, async (req, res) => {
+// Update user
+app.post(`/users/:id`, async (req, res) => {
   const { id } = req.params;
 
   const updatedUser = await prisma.user.update({
@@ -58,7 +57,28 @@ app.post(`/user/:id`, async (req, res) => {
   res.json(updatedUser);
 });
 
-app.post(`/community`, async (req, res) => {
+// Delete user
+app.delete(`/users/:id`, async (req, res) => {
+  const { id } = req.params;
+
+  const deletedUser = await prisma.user.delete({
+    where: {
+      id: parseInt(id),
+    },
+  });
+  res.json(deletedUser);
+});
+
+// COMMUNITIES
+
+// Get communities
+app.get("/communities", async (req, res) => {
+  const communities = await prisma.community.findMany();
+  res.json(communities);
+});
+
+// Create a community
+app.post(`/communities`, async (req, res) => {
   const { url, name, description, creatorId } = req.body;
   const result = await prisma.community.create({
     data: {
@@ -69,6 +89,67 @@ app.post(`/community`, async (req, res) => {
     },
   });
   res.json(result);
+});
+
+// Get community by url
+app.get(`/c/:url`, async (req, res) => {
+  const result = await prisma.community.findOne({
+    where: {
+      url: req.params.url,
+    },
+  });
+  res.json(result);
+});
+
+// DISCUSSIONS
+
+// Get discussions in a community
+app.get(`/c/:url/discussions`, async (req, res) => {
+  // Might refactor this to use the community URL
+  // as the primary key and get rid of communityId
+  // so that the call to fetch the community ID can
+  // be avoided.
+  const communityData = await prisma.community.findOne({
+    where: {
+      url: req.params.url,
+    },
+  });
+
+  const communityId = communityData.id;
+
+  const discussions = await prisma.discussion.findMany({
+    where: {
+      Community: {
+        id: {
+          equals: communityId,
+        },
+      },
+    },
+  });
+  res.json(discussions);
+});
+
+// Create a discussion in a community
+app.post(`/c/:community/discussions`, async (req, res) => {
+  const { authorId, body, communityId, title } = req.body;
+
+  const newDiscussion = await prisma.discussion.create({
+    data: {
+      Community: {
+        connect: {
+          id: parseInt(communityId),
+        },
+      },
+      title,
+      body,
+      User: {
+        connect: {
+          id: parseInt(authorId),
+        },
+      },
+    },
+  });
+  res.json(newDiscussion);
 });
 
 const server = app.listen(3000, () =>
