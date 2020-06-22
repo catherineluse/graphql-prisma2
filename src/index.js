@@ -105,13 +105,12 @@ app.get(`/c/:url`, async (req, res) => {
 
 // Get discussions in a community
 app.get(`/c/:url/discussions`, async (req, res) => {
-  // Might refactor this to use the community URL
-  // as the primary key and get rid of communityId
-  // so that the call to fetch the community ID can
-  // be avoided.
   const communityData = await prisma.community.findOne({
     where: {
       url: req.params.url,
+    },
+    select: {
+      id: true,
     },
   });
 
@@ -126,6 +125,30 @@ app.get(`/c/:url/discussions`, async (req, res) => {
       },
     },
   });
+  res.json(discussions);
+});
+
+// Get discussions authored by a user
+app.get(`/:handle/discussions`, async (req, res) => {
+  // Get user ID by handle
+  const userData = await prisma.user.findOne({
+    where: {
+      handle: req.params.handle,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  const userId = userData.id;
+
+  // Get discussions by user ID
+  const discussions = await prisma.discussion.findMany({
+    where: {
+      authorId: userId,
+    },
+  });
+
   res.json(discussions);
 });
 

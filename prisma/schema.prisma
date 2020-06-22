@@ -57,6 +57,7 @@ model User {
   email      String       @unique
   id         Int          @default(autoincrement()) @id
   name       String
+  handle     String       @unique
   Comment    Comment[]
   Community  Community[]
   Discussion Discussion[]
