@@ -43,25 +43,27 @@ model Discussion {
 }
 
 model Message {
-  authorId    Int
-  createdAt   DateTime @default(now())
-  id          Int      @id
-  recipientId Int
-  text        String
-  User        User     @relation("Message_authorIdToUser", fields: [authorId], references: [id])
+  authorId      Int
+  createdAt     DateTime @default(now())
+  id            Int      @default(autoincrement()) @id
+  recipientId   Int
+  text          String
+  userAuthor    User     @relation("author_of_message", fields: [authorId], references: [id])
+  userRecipient User     @relation("recipient_of_message", fields: [recipientId], references: [id])
 }
 
 model User {
-  age        Int?
-  createdAt  DateTime     @default(now())
-  email      String       @unique
-  id         Int          @default(autoincrement()) @id
-  name       String
-  handle     String       @unique
-  Comment    Comment[]
-  Community  Community[]
-  Discussion Discussion[]
-  Message    Message[]    @relation("Message_authorIdToUser")
+  age              Int?
+  createdAt        DateTime     @default(now())
+  email            String       @unique
+  id               Int          @default(autoincrement()) @id
+  name             String
+  handle           String       @unique
+  Comment          Comment[]
+  Community        Community[]
+  Discussion       Discussion[]
+  sentMessages     Message[]    @relation("author_of_message")
+  receivedMessages Message[]    @relation("recipient_of_message")
 }
 
 enum Role {

@@ -175,6 +175,30 @@ app.post(`/c/:community/discussions`, async (req, res) => {
   res.json(newDiscussion);
 });
 
+// MESSAGES
+
+// Create a message from one user to another
+app.post(`/u/:handle/message`, async (req, res) => {
+  const { authorId, text } = req.body;
+
+  const newMessage = await prisma.message.create({
+    data: {
+      userRecipient: {
+        connect: {
+          handle: req.params.handle,
+        },
+      },
+      userAuthor: {
+        connect: {
+          id: parseInt(authorId),
+        },
+      },
+      text,
+    },
+  });
+  res.json(newMessage);
+});
+
 const server = app.listen(3000, () =>
   console.log(
     "🚀 Server ready at: http://localhost:3000\n⭐️ See sample requests: http://pris.ly/e/ts/rest-express#3-using-the-rest-api"
