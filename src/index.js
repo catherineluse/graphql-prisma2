@@ -128,19 +128,21 @@ app.get(`/c/:url/discussions`, async (req, res) => {
   res.json(discussions);
 });
 
-// Get discussions authored by a user
-app.get(`/:handle/discussions`, async (req, res) => {
-  // Get user ID by handle
+const getUserIdByHandle = async (handle) => {
   const userData = await prisma.user.findOne({
     where: {
-      handle: req.params.handle,
+      handle,
     },
     select: {
       id: true,
     },
   });
+  return parseInt(userData.id);
+};
 
-  const userId = userData.id;
+// Get discussions authored by a user
+app.get(`/:handle/discussions`, async (req, res) => {
+  const userId = await getUserIdByHandle(req.params.handle);
 
   // Get discussions by user ID
   const discussions = await prisma.discussion.findMany({
@@ -197,6 +199,52 @@ app.post(`/u/:handle/message`, async (req, res) => {
     },
   });
   res.json(newMessage);
+});
+
+// Get all correspondence to and from one user
+app.get(`/u/:handle/message`, async(req, res));
+
+// Get a conversation between two users
+// Example query:
+// localhost:3000/u/randomperson/message&interlocutor=cluse
+app.get(`/u/:handle/message/`, async (req, res) => {
+  const { handle } = req.params;
+  const { interlocutor } = req.query;
+
+  const loggedInUserId = await getUserIdByHandle(handle);
+  const interlocutorId = await getUserIdByHandle(interlocutor);
+
+  const messagesToInterlocutor = await prisma.message.findMany({
+    where: {
+      AND: [
+        {
+          recipientId: interlocutorId,
+        },
+        {
+          authorId: loggedInUserId,
+        },
+      ],
+    },
+  });
+
+  const messagesFromInterlocutor = await prisma.message.findMany({
+    where: {
+      AND: [
+        {
+          recipientId: loggedInUserId,
+        },
+        {
+          authorId: interlocutorId,
+        },
+      ],
+    },
+  });
+
+  const conversation = [...messagesToInterlocutor, ...messagesFromInterlocutor];
+  const chronologicalConversation = conversation.sort(
+    (a, b) => b.createdAt - a.createdAt
+  );
+  res.json(chronologicalConversation);
 });
 
 const server = app.listen(3000, () =>
