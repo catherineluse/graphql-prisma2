@@ -202,18 +202,54 @@ app.post(`/u/:handle/message`, async (req, res) => {
 });
 
 // Get all correspondence to and from one user
-app.get(`/u/:handle/message`, async(req, res));
+const getAllCorrespondence = async (userId) => {
+  const messages = await prisma.message.findMany({
+    where: {
+      OR: [
+        {
+          recipientId: userId,
+        },
+        {
+          authorId: userId,
+        },
+      ],
+    },
+  });
+
+  const chronologicalMessages = messages.sort(
+    (a, b) => b.createdAt - a.createdAt
+  );
+  return chronologicalMessages;
+};
 
 // Get a conversation between two users
 // Example query:
 // localhost:3000/u/randomperson/message&interlocutor=cluse
 app.get(`/u/:handle/message/`, async (req, res) => {
   const { handle } = req.params;
-  const { interlocutor } = req.query;
+
+  if (!handle) {
+    res.json("Could not find the user.");
+    return;
+  }
 
   const loggedInUserId = await getUserIdByHandle(handle);
+
+  const { interlocutor } = req.query;
+
+  // If no interlocutor is specified, return all
+  // messages sent or received by the logged-in user.
+  if (!interlocutor) {
+    const allCorrespondence = await getAllCorrespondence(loggedInUserId);
+    res.json(allCorrespondence);
+    return;
+  }
+
   const interlocutorId = await getUserIdByHandle(interlocutor);
 
+  // If an interlocutor is specified, return
+  // only the messages between the logged-in user
+  // and the interlocutor.
   const messagesToInterlocutor = await prisma.message.findMany({
     where: {
       AND: [
