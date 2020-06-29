@@ -70,8 +70,8 @@ app.delete(`/u/:handle`, async (req, res) => {
 });
 
 // Get the communities a logged-in user is subscribed to
-app.get(`/subscribed`, async (req, res) => {
-  const { handle } = req.body;
+app.get(`/u/:handle/subscribed`, async (req, res) => {
+  const { handle } = req.params;
   const communityList = await prisma.user
     .findOne({
       where: {
@@ -79,6 +79,20 @@ app.get(`/subscribed`, async (req, res) => {
       },
     })
     .SubscriberOfCommunities();
+
+  res.json(communityList);
+});
+
+// Get the communities a user organizes
+app.get(`/u/:handle/organizer`, async (req, res) => {
+  const { handle } = req.params;
+  const communityList = await prisma.user
+    .findOne({
+      where: {
+        handle,
+      },
+    })
+    .OrganizerOfCommunities();
 
   res.json(communityList);
 });
@@ -133,15 +147,15 @@ app.post(`/c/:url/unsubscribe`, async (req, res) => {
 
 // Create a community
 app.post(`/communities`, async (req, res) => {
-  const { url, name, description, creatorHandle } = req.body;
+  const { url, name, description, organizerHandle } = req.body;
   const result = await prisma.community.create({
     data: {
       url,
       name,
       description,
-      Creator: {
+      Organizer: {
         connect: {
-          handle: creatorHandle,
+          handle: organizerHandle,
         },
       },
     },

@@ -1,0 +1,312 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateModel",
+      "model": "OrganizersOfCommunities"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OrganizersOfCommunities",
+      "field": "Community",
+      "type": "Community",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "OrganizersOfCommunities",
+          "field": "Community"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OrganizersOfCommunities",
+          "field": "Community"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[communityUrl]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OrganizersOfCommunities",
+          "field": "Community"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[url]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OrganizersOfCommunities",
+      "field": "communityUrl",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OrganizersOfCommunities",
+      "field": "User",
+      "type": "User",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "OrganizersOfCommunities",
+          "field": "User"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OrganizersOfCommunities",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[userHandle]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OrganizersOfCommunities",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[handle]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OrganizersOfCommunities",
+      "field": "userHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "OrganizersOfCommunities",
+      "field": "createdAt",
+      "type": "DateTime",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "OrganizersOfCommunities",
+          "field": "createdAt"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "OrganizersOfCommunities",
+          "field": "createdAt"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "now()"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Model",
+          "model": "OrganizersOfCommunities"
+        },
+        "directive": "id"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Model",
+          "model": "OrganizersOfCommunities"
+        },
+        "directive": "id"
+      },
+      "argument": "",
+      "value": "[communityUrl, userHandle]"
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "CreatorsOfCommunities"
+    },
+    {
+      "tag": "CreateField",
+      "model": "User",
+      "field": "OrganizerOfCommunities",
+      "type": "Community",
+      "arity": "List"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "User",
+          "field": "OrganizerOfCommunities"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "User",
+          "field": "OrganizerOfCommunities"
+        },
+        "directive": "relation"
+      },
+      "argument": "",
+      "value": "\"OrganizersOfCommunities\""
+    },
+    {
+      "tag": "CreateField",
+      "model": "User",
+      "field": "OrganizersOfCommunities",
+      "type": "OrganizersOfCommunities",
+      "arity": "List"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "CreatorOfCommunities"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "CreatorsOfCommunities"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Community",
+      "field": "organizerHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Community",
+      "field": "Organizer",
+      "type": "User",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Community",
+          "field": "Organizer"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Community",
+          "field": "Organizer"
+        },
+        "directive": "relation"
+      },
+      "argument": "",
+      "value": "\"OrganizersOfCommunities\""
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Community",
+          "field": "Organizer"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[organizerHandle]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Community",
+          "field": "Organizer"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[handle]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Community",
+      "field": "OrganizersOfCommunities",
+      "type": "OrganizersOfCommunities",
+      "arity": "List"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Community",
+      "field": "Creator"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Community",
+      "field": "CreatorsOfCommunities"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Community",
+      "field": "creatorHandle"
+    }
+  ]
+}
