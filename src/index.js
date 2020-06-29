@@ -15,17 +15,23 @@ app.get("/", async (req, res) => {
 
 // Create user
 app.post("/users", async (req, res) => {
-  const result = await prisma.user.create({
-    data: {
-      ...req.body,
-    },
-  });
+  const result = await prisma.user
+    .create({
+      data: {
+        ...req.body,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
   res.json(result);
 });
 
 // Get users
 app.get("/users", async (req, res) => {
-  const users = await prisma.user.findMany();
+  const users = await prisma.user.findMany().catch((error) => {
+    res.send(error.message);
+  });
   res.json(users);
 });
 
@@ -33,11 +39,15 @@ app.get("/users", async (req, res) => {
 app.get(`/u/:handle`, async (req, res) => {
   const { handle } = req.params;
 
-  const userData = await prisma.user.findOne({
-    where: {
-      handle,
-    },
-  });
+  const userData = await prisma.user
+    .findOne({
+      where: {
+        handle,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
   res.json(userData);
 });
 
@@ -45,14 +55,18 @@ app.get(`/u/:handle`, async (req, res) => {
 app.post(`/u/:handle`, async (req, res) => {
   const { handle } = req.params;
 
-  const updatedUser = await prisma.user.update({
-    where: {
-      handle,
-    },
-    data: {
-      ...req.body,
-    },
-  });
+  const updatedUser = await prisma.user
+    .update({
+      where: {
+        handle,
+      },
+      data: {
+        ...req.body,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   res.json(updatedUser);
 });
@@ -61,11 +75,16 @@ app.post(`/u/:handle`, async (req, res) => {
 app.delete(`/u/:handle`, async (req, res) => {
   const { handle } = req.params;
 
-  const deletedUser = await prisma.user.delete({
-    where: {
-      handle,
-    },
-  });
+  const deletedUser = await prisma.user
+    .delete({
+      where: {
+        handle,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
   res.json(deletedUser);
 });
 
@@ -78,7 +97,10 @@ app.get(`/u/:handle/subscribed`, async (req, res) => {
         handle,
       },
     })
-    .SubscriberOfCommunities();
+    .SubscriberOfCommunities()
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   res.json(communityList);
 });
@@ -92,7 +114,10 @@ app.get(`/u/:handle/organizer`, async (req, res) => {
         handle,
       },
     })
-    .OrganizerOfCommunities();
+    .OrganizerOfCommunities()
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   res.json(communityList);
 });
@@ -115,7 +140,10 @@ app.post(`/c/:url/subscribe`, async (req, res) => {
         },
       },
     })
-    .SubscriberOfCommunities();
+    .SubscriberOfCommunities()
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   res.json(updatedSubscribedCommunities);
 });
@@ -138,7 +166,10 @@ app.post(`/c/:url/unsubscribe`, async (req, res) => {
         },
       },
     })
-    .SubscriberOfCommunities();
+    .SubscriberOfCommunities()
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   res.json(updatedUser);
 });
@@ -148,18 +179,23 @@ app.post(`/c/:url/unsubscribe`, async (req, res) => {
 // Create a community
 app.post(`/communities`, async (req, res) => {
   const { url, name, description, organizerHandle } = req.body;
-  const result = await prisma.community.create({
-    data: {
-      url,
-      name,
-      description,
-      Organizer: {
-        connect: {
-          handle: organizerHandle,
+  const result = await prisma.community
+    .create({
+      data: {
+        url,
+        name,
+        description,
+        Organizer: {
+          connect: {
+            handle: organizerHandle,
+          },
         },
       },
-    },
-  });
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
   res.json(result);
 });
 
@@ -167,21 +203,28 @@ app.post(`/communities`, async (req, res) => {
 app.post(`/c/:url`, async (req, res) => {
   const { url } = req.params;
 
-  const result = await prisma.community.update({
-    where: {
-      url,
-    },
-    data: {
-      ...req.body,
-    },
-  });
+  const result = await prisma.community
+    .update({
+      where: {
+        url,
+      },
+      data: {
+        ...req.body,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   res.json(result);
 });
 
 // Get communities
 app.get("/communities", async (req, res) => {
-  const communities = await prisma.community.findMany();
+  const communities = await prisma.community.findMany().catch((error) => {
+    res.send(error.message);
+  });
+
   res.json(communities);
 });
 
@@ -189,11 +232,16 @@ app.get("/communities", async (req, res) => {
 app.get(`/c/:url`, async (req, res) => {
   const { url } = req.params;
 
-  const result = await prisma.community.findOne({
-    where: {
-      url,
-    },
-  });
+  const result = await prisma.community
+    .findOne({
+      where: {
+        url,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
   res.json(result);
 });
 
@@ -203,22 +251,27 @@ app.get(`/c/:url`, async (req, res) => {
 app.post(`/c/:url/discussions`, async (req, res) => {
   const { authorId, body, communityId, title } = req.body;
 
-  const newDiscussion = await prisma.discussion.create({
-    data: {
-      Community: {
-        connect: {
-          id: parseInt(communityId),
+  const newDiscussion = await prisma.discussion
+    .create({
+      data: {
+        Community: {
+          connect: {
+            id: parseInt(communityId),
+          },
+        },
+        title,
+        body,
+        User: {
+          connect: {
+            id: parseInt(authorId),
+          },
         },
       },
-      title,
-      body,
-      User: {
-        connect: {
-          id: parseInt(authorId),
-        },
-      },
-    },
-  });
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
   res.json(newDiscussion);
 });
 
@@ -232,7 +285,10 @@ app.get(`/c/:url/discussions`, async (req, res) => {
         url,
       },
     })
-    .Discussion();
+    .Discussion()
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   res.json(discussions);
 });
@@ -247,7 +303,10 @@ app.get(`/u/:handle/discussions`, async (req, res) => {
         handle,
       },
     })
-    .Discussion();
+    .Discussion()
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   res.json(discussions);
 });
@@ -259,21 +318,26 @@ app.post(`/u/:recipientHandle/message`, async (req, res) => {
   const { authorHandle, text } = req.body;
   const { recipientHandle } = req.params;
 
-  const newMessage = await prisma.message.create({
-    data: {
-      Recipient: {
-        connect: {
-          handle: recipientHandle,
+  const newMessage = await prisma.message
+    .create({
+      data: {
+        Recipient: {
+          connect: {
+            handle: recipientHandle,
+          },
         },
-      },
-      Author: {
-        connect: {
-          handle: authorHandle,
+        Author: {
+          connect: {
+            handle: authorHandle,
+          },
         },
+        text,
       },
-      text,
-    },
-  });
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
   res.json(newMessage);
 });
 
@@ -285,18 +349,23 @@ const sortMessages = (messages) => {
 app.get(`/u/:handle/message`, async (req, res) => {
   const { handle } = req.params;
 
-  const sentAndReceivedMessages = await prisma.message.findMany({
-    where: {
-      OR: [
-        {
-          recipientHandle: handle,
-        },
-        {
-          authorHandle: handle,
-        },
-      ],
-    },
-  });
+  const sentAndReceivedMessages = await prisma.message
+    .findMany({
+      where: {
+        OR: [
+          {
+            recipientHandle: handle,
+          },
+          {
+            authorHandle: handle,
+          },
+        ],
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
   const chronologicalMessages = sortMessages(sentAndReceivedMessages);
   res.json(chronologicalMessages);
 });
@@ -305,37 +374,136 @@ app.get(`/u/:handle/message`, async (req, res) => {
 app.get(`/u/:handle/message/:interlocutor`, async (req, res) => {
   const { handle, interlocutor } = req.params;
 
-  const messagesToInterlocutor = await prisma.message.findMany({
-    where: {
-      AND: [
-        {
-          recipientHandle: interlocutor,
-        },
-        {
-          authorHandle: handle,
-        },
-      ],
-    },
-  });
+  const messagesToInterlocutor = await prisma.message
+    .findMany({
+      where: {
+        AND: [
+          {
+            recipientHandle: interlocutor,
+          },
+          {
+            authorHandle: handle,
+          },
+        ],
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
 
-  const messagesFromInterlocutor = await prisma.message.findMany({
-    where: {
-      AND: [
-        {
-          recipientHandle: handle,
-        },
-        {
-          authorHandle: interlocutor,
-        },
-      ],
-    },
-  });
+  const messagesFromInterlocutor = await prisma.message
+    .findMany({
+      where: {
+        AND: [
+          {
+            recipientHandle: handle,
+          },
+          {
+            authorHandle: interlocutor,
+          },
+        ],
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
 
   const conversation = [...messagesToInterlocutor, ...messagesFromInterlocutor];
   const chronologicalConversation = sortMessages(conversation);
 
   res.json(chronologicalConversation);
 });
+
+// COMMENTS
+
+// Create root comment in discussion
+// Requirements:
+// - isRootComment must be true
+// - there is no parent comment
+app.post("/c/:communityUrl/discussion/:discussionId", async (req, res) => {
+  const { authorHandle, text, isRootComment } = req.body;
+  const { discussionId } = req.params;
+
+  const comment = await prisma.comment
+    .create({
+      data: {
+        User: {
+          connect: {
+            handle: authorHandle,
+          },
+        },
+        Discussion: {
+          connect: {
+            id: parseInt(discussionId),
+          },
+        },
+        text,
+        isRootComment,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  res.json(comment);
+});
+
+// Create child comment
+// Requirements:
+// - isRootComment must be false
+// - a parent comment ID must be provided
+app.post(
+  "/c/:communityUrl/discussion/:discussionId/comments/:commentId",
+  async (req, res) => {
+    const { authorHandle, text, isRootComment } = req.body;
+    const { discussionId, commentId } = req.params;
+
+    const comment = await prisma.comment
+      .create({
+        data: {
+          User: {
+            connect: {
+              handle: authorHandle,
+            },
+          },
+          Discussion: {
+            connect: {
+              id: parseInt(discussionId),
+            },
+          },
+          parentComment: {
+            connect: {
+              id: parseInt(commentId),
+            },
+          },
+          text,
+          isRootComment,
+        },
+      })
+      .catch((error) => {
+        res.send(error.message);
+      });
+
+    res.json(comment);
+  }
+);
+
+// Update comment
+
+// Delete comment
+
+// Get all root comments in discussion
+
+// Get root comments in discussion,
+// plus the replies to those comments (children)
+// and replies to the replies (grandchildren).
+
+// Get descendant comments of a comment (children
+// and grandchildren).
+
+// Get all comments authored by user
+
+// Get comments and discussions authored by user
 
 const server = app.listen(3000, () =>
   console.log(

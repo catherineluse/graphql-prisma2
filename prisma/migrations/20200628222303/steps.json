@@ -1,0 +1,39 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "Comment",
+      "field": "parentCommentId",
+      "type": "Int",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Comment",
+      "field": "isRootComment",
+      "type": "Boolean",
+      "arity": "Required"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Comment",
+      "field": "parentComment",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Comment",
+          "field": "parentComment"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[parentCommentId]"
+    }
+  ]
+}

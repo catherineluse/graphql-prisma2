@@ -4,14 +4,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Comment {
   authorHandle    String
   createdAt       DateTime   @default(now())
   discussionId    Int
-  id              Int        @default(autoincrement()) @id
+  id              Int        @id
   parentCommentId Int?
   text            String
   isRootComment   Boolean
