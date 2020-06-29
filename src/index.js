@@ -488,15 +488,36 @@ app.post(
   }
 );
 
+// Get discussion with structured comments
+app.get(`/c/:communityUrl/discussion/:discussionId`, async (req, res) => {
+  const { discussionId } = req.params;
+
+  const discussion = await prisma.discussion
+    .findOne({
+      where: {
+        id: parseInt(discussionId),
+      },
+      include: {
+        Comment: {
+          where: {
+            isRootComment: true,
+          },
+          include: {
+            childComment: true,
+          },
+        },
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  res.json(discussion);
+});
+
 // Update comment
 
 // Delete comment
-
-// Get all root comments in discussion
-
-// Get root comments in discussion,
-// plus the replies to those comments (children)
-// and replies to the replies (grandchildren).
 
 // Get descendant comments of a comment (children
 // and grandchildren).
