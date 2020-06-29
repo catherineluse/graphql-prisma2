@@ -13,12 +13,6 @@ app.get("/", async (req, res) => {
 
 // USERS
 
-// Get users
-app.get("/users", async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
-});
-
 // Create user
 app.post("/users", async (req, res) => {
   const result = await prisma.user.create({
@@ -29,25 +23,31 @@ app.post("/users", async (req, res) => {
   res.json(result);
 });
 
-// Get user by ID
-app.get(`/users/:id`, async (req, res) => {
-  const { id } = req.params;
+// Get users
+app.get("/users", async (req, res) => {
+  const users = await prisma.user.findMany();
+  res.json(users);
+});
 
-  const userById = await prisma.user.findOne({
+// Get user by handle
+app.get(`/u/:handle`, async (req, res) => {
+  const { handle } = req.params;
+
+  const userData = await prisma.user.findOne({
     where: {
-      id: parseInt(id),
+      handle,
     },
   });
-  res.json(userById);
+  res.json(userData);
 });
 
 // Update user
-app.post(`/users/:id`, async (req, res) => {
-  const { id } = req.params;
+app.post(`/u/:handle`, async (req, res) => {
+  const { handle } = req.params;
 
   const updatedUser = await prisma.user.update({
     where: {
-      id: parseInt(id),
+      handle,
     },
     data: {
       ...req.body,
@@ -58,18 +58,112 @@ app.post(`/users/:id`, async (req, res) => {
 });
 
 // Delete user
-app.delete(`/users/:id`, async (req, res) => {
-  const { id } = req.params;
+app.delete(`/u/:handle`, async (req, res) => {
+  const { handle } = req.params;
 
   const deletedUser = await prisma.user.delete({
     where: {
-      id: parseInt(id),
+      handle,
     },
   });
   res.json(deletedUser);
 });
 
+// Get the communities a logged-in user is subscribed to
+app.get(`/subscribed`, async (req, res) => {
+  const { handle } = req.body;
+  const communityList = await prisma.user
+    .findOne({
+      where: {
+        handle,
+      },
+    })
+    .SubscriberOfCommunities();
+
+  res.json(communityList);
+});
+
+// Subscribe a user to a community
+app.post(`/c/:url/subscribe`, async (req, res) => {
+  const { url } = req.params;
+  const { handle } = req.body;
+
+  const updatedSubscribedCommunities = await prisma.user
+    .update({
+      where: {
+        handle,
+      },
+      data: {
+        SubscriberOfCommunities: {
+          connect: {
+            url,
+          },
+        },
+      },
+    })
+    .SubscriberOfCommunities();
+
+  res.json(updatedSubscribedCommunities);
+});
+
+// Unsubscribe a user from a community
+app.post(`/c/:url/unsubscribe`, async (req, res) => {
+  const { url } = req.params;
+  const { handle } = req.body;
+
+  const updatedUser = await prisma.user
+    .update({
+      where: {
+        handle,
+      },
+      data: {
+        SubscriberOfCommunities: {
+          disconnect: {
+            url,
+          },
+        },
+      },
+    })
+    .SubscriberOfCommunities();
+
+  res.json(updatedUser);
+});
+
 // COMMUNITIES
+
+// Create a community
+app.post(`/communities`, async (req, res) => {
+  const { url, name, description, creatorHandle } = req.body;
+  const result = await prisma.community.create({
+    data: {
+      url,
+      name,
+      description,
+      Creator: {
+        connect: {
+          handle: creatorHandle,
+        },
+      },
+    },
+  });
+  res.json(result);
+});
+
+// Update a community
+app.post(`/c/:url`, async (req, res) => {
+  const { url } = req.params;
+
+  const result = await prisma.community.update({
+    where: {
+      url,
+    },
+    data: {
+      ...req.body,
+    },
+  });
+
+  res.json(result);
+});
 
 // Get communities
 app.get("/communities", async (req, res) => {
@@ -77,25 +171,13 @@ app.get("/communities", async (req, res) => {
   res.json(communities);
 });
 
-// Create a community
-app.post(`/communities`, async (req, res) => {
-  const { url, name, description, creatorId } = req.body;
-  const result = await prisma.community.create({
-    data: {
-      Creator: { connect: { id: parseInt(creatorId) } },
-      url,
-      name,
-      description,
-    },
-  });
-  res.json(result);
-});
-
 // Get community by url
 app.get(`/c/:url`, async (req, res) => {
+  const { url } = req.params;
+
   const result = await prisma.community.findOne({
     where: {
-      url: req.params.url,
+      url,
     },
   });
   res.json(result);
@@ -103,59 +185,8 @@ app.get(`/c/:url`, async (req, res) => {
 
 // DISCUSSIONS
 
-// Get discussions in a community
-app.get(`/c/:url/discussions`, async (req, res) => {
-  const communityData = await prisma.community.findOne({
-    where: {
-      url: req.params.url,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  const communityId = communityData.id;
-
-  const discussions = await prisma.discussion.findMany({
-    where: {
-      Community: {
-        id: {
-          equals: communityId,
-        },
-      },
-    },
-  });
-  res.json(discussions);
-});
-
-const getUserIdByHandle = async (handle) => {
-  const userData = await prisma.user.findOne({
-    where: {
-      handle,
-    },
-    select: {
-      id: true,
-    },
-  });
-  return parseInt(userData.id);
-};
-
-// Get discussions authored by a user
-app.get(`/:handle/discussions`, async (req, res) => {
-  const userId = await getUserIdByHandle(req.params.handle);
-
-  // Get discussions by user ID
-  const discussions = await prisma.discussion.findMany({
-    where: {
-      authorId: userId,
-    },
-  });
-
-  res.json(discussions);
-});
-
 // Create a discussion in a community
-app.post(`/c/:community/discussions`, async (req, res) => {
+app.post(`/c/:url/discussions`, async (req, res) => {
   const { authorId, body, communityId, title } = req.body;
 
   const newDiscussion = await prisma.discussion.create({
@@ -177,22 +208,53 @@ app.post(`/c/:community/discussions`, async (req, res) => {
   res.json(newDiscussion);
 });
 
+// Get discussions in a community
+app.get(`/c/:url/discussions`, async (req, res) => {
+  const { url } = req.params;
+
+  const discussions = await prisma.community
+    .findOne({
+      where: {
+        url,
+      },
+    })
+    .Discussion();
+
+  res.json(discussions);
+});
+
+// Get discussions authored by a user
+app.get(`/u/:handle/discussions`, async (req, res) => {
+  const { handle } = req.params;
+
+  const discussions = await prisma.user
+    .findOne({
+      where: {
+        handle,
+      },
+    })
+    .Discussion();
+
+  res.json(discussions);
+});
+
 // MESSAGES
 
 // Create a message from one user to another
-app.post(`/u/:handle/message`, async (req, res) => {
-  const { authorId, text } = req.body;
+app.post(`/u/:recipientHandle/message`, async (req, res) => {
+  const { authorHandle, text } = req.body;
+  const { recipientHandle } = req.params;
 
   const newMessage = await prisma.message.create({
     data: {
-      userRecipient: {
+      Recipient: {
         connect: {
-          handle: req.params.handle,
+          handle: recipientHandle,
         },
       },
-      userAuthor: {
+      Author: {
         connect: {
-          id: parseInt(authorId),
+          handle: authorHandle,
         },
       },
       text,
@@ -201,63 +263,42 @@ app.post(`/u/:handle/message`, async (req, res) => {
   res.json(newMessage);
 });
 
+const sortMessages = (messages) => {
+  return messages.sort((a, b) => b.createdAt - a.createdAt);
+};
+
 // Get all correspondence to and from one user
-const getAllCorrespondence = async (userId) => {
-  const messages = await prisma.message.findMany({
+app.get(`/u/:handle/message`, async (req, res) => {
+  const { handle } = req.params;
+
+  const sentAndReceivedMessages = await prisma.message.findMany({
     where: {
       OR: [
         {
-          recipientId: userId,
+          recipientHandle: handle,
         },
         {
-          authorId: userId,
+          authorHandle: handle,
         },
       ],
     },
   });
-
-  const chronologicalMessages = messages.sort(
-    (a, b) => b.createdAt - a.createdAt
-  );
-  return chronologicalMessages;
-};
+  const chronologicalMessages = sortMessages(sentAndReceivedMessages);
+  res.json(chronologicalMessages);
+});
 
 // Get a conversation between two users
-// Example query:
-// localhost:3000/u/randomperson/message&interlocutor=cluse
-app.get(`/u/:handle/message/`, async (req, res) => {
-  const { handle } = req.params;
+app.get(`/u/:handle/message/:interlocutor`, async (req, res) => {
+  const { handle, interlocutor } = req.params;
 
-  if (!handle) {
-    res.json("Could not find the user.");
-    return;
-  }
-
-  const loggedInUserId = await getUserIdByHandle(handle);
-
-  const { interlocutor } = req.query;
-
-  // If no interlocutor is specified, return all
-  // messages sent or received by the logged-in user.
-  if (!interlocutor) {
-    const allCorrespondence = await getAllCorrespondence(loggedInUserId);
-    res.json(allCorrespondence);
-    return;
-  }
-
-  const interlocutorId = await getUserIdByHandle(interlocutor);
-
-  // If an interlocutor is specified, return
-  // only the messages between the logged-in user
-  // and the interlocutor.
   const messagesToInterlocutor = await prisma.message.findMany({
     where: {
       AND: [
         {
-          recipientId: interlocutorId,
+          recipientHandle: interlocutor,
         },
         {
-          authorId: loggedInUserId,
+          authorHandle: handle,
         },
       ],
     },
@@ -267,19 +308,18 @@ app.get(`/u/:handle/message/`, async (req, res) => {
     where: {
       AND: [
         {
-          recipientId: loggedInUserId,
+          recipientHandle: handle,
         },
         {
-          authorId: interlocutorId,
+          authorHandle: interlocutor,
         },
       ],
     },
   });
 
   const conversation = [...messagesToInterlocutor, ...messagesFromInterlocutor];
-  const chronologicalConversation = conversation.sort(
-    (a, b) => b.createdAt - a.createdAt
-  );
+  const chronologicalConversation = sortMessages(conversation);
+
   res.json(chronologicalConversation);
 });
 

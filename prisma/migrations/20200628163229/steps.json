@@ -1,0 +1,537 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "Discussion",
+      "field": "authorHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Discussion",
+      "field": "communityUrl",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Discussion",
+      "field": "communityId"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Discussion",
+      "field": "authorId"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Discussion",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[authorHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Discussion",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Discussion",
+          "field": "Community"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[communityUrl]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Discussion",
+          "field": "Community"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[url]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Comment",
+      "field": "authorHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Comment",
+      "field": "authorId"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Comment",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[authorHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Comment",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Message",
+      "field": "authorHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Message",
+      "field": "recipientHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Message",
+      "field": "authorId"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Message",
+      "field": "recipientId"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Message",
+          "field": "Author"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[authorHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Message",
+          "field": "Author"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Message",
+          "field": "Recipient"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[recipientHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Message",
+          "field": "Recipient"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Community",
+      "field": "creatorHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Community",
+      "field": "creatorId"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Community",
+          "field": "Creator"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[creatorHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Community",
+          "field": "Creator"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "SubscribersOfCommunities",
+      "field": "communityUrl",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "SubscribersOfCommunities",
+      "field": "userHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "SubscribersOfCommunities",
+      "field": "communityId"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "SubscribersOfCommunities",
+      "field": "userId"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "SubscribersOfCommunities",
+          "field": "Community"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[communityUrl]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "SubscribersOfCommunities",
+          "field": "Community"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[url]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "SubscribersOfCommunities",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[userHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "SubscribersOfCommunities",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Model",
+          "model": "SubscribersOfCommunities"
+        },
+        "directive": "id"
+      },
+      "argument": "",
+      "newValue": "[communityUrl, userHandle]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "CreatorsOfCommunities",
+      "field": "communityUrl",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "CreatorsOfCommunities",
+      "field": "userHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "CreatorsOfCommunities",
+      "field": "communityId"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "CreatorsOfCommunities",
+      "field": "userId"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "CreatorsOfCommunities",
+          "field": "Community"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[communityUrl]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "CreatorsOfCommunities",
+          "field": "Community"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[url]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "CreatorsOfCommunities",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[userHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "CreatorsOfCommunities",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Model",
+          "model": "CreatorsOfCommunities"
+        },
+        "directive": "id"
+      },
+      "argument": "",
+      "newValue": "[communityUrl, userHandle]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "AuthorsOfMessages",
+      "field": "userHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "AuthorsOfMessages",
+      "field": "userId"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "AuthorsOfMessages",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[userHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "AuthorsOfMessages",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Model",
+          "model": "AuthorsOfMessages"
+        },
+        "directive": "id"
+      },
+      "argument": "",
+      "newValue": "[messageId, userHandle]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "RecipientsOfMessages",
+      "field": "userHandle",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "RecipientsOfMessages",
+      "field": "userId"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "RecipientsOfMessages",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[userHandle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "RecipientsOfMessages",
+          "field": "User"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "newValue": "[handle]"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Model",
+          "model": "RecipientsOfMessages"
+        },
+        "directive": "id"
+      },
+      "argument": "",
+      "newValue": "[messageId, userHandle]"
+    }
+  ]
+}

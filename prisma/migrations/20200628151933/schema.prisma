@@ -4,16 +4,16 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Comment {
-  authorHandle  String
+  authorId      Int
   createdAt     DateTime   @default(now())
   discussionId  Int
   id            Int        @id
   text          String
-  User          User       @relation(fields: [authorHandle], references: [handle])
+  User          User       @relation(fields: [authorId], references: [id])
   Discussion    Discussion @relation(fields: [discussionId], references: [id])
   parentComment Comment    @relation("CommentToComment_id", fields: [id], references: [id])
   childComment  Comment[]  @relation("CommentToComment_id")
@@ -21,12 +21,12 @@ model Comment {
 
 model Community {
   createdAt                DateTime                   @default(now())
-  creatorHandle            String
+  creatorId                Int
   description              String?
   id                       Int                        @default(autoincrement()) @id
   name                     String
   url                      String                     @unique
-  Creator                  User                       @relation("CreatorsOfCommunities", fields: [creatorHandle], references: [handle])
+  Creator                  User                       @relation("CreatorsOfCommunities", fields: [creatorId], references: [id])
   Subscribers              User[]                     @relation("SubscribersOfCommunities", references: [id])
   Discussion               Discussion[]
   SubscribersOfCommunities SubscribersOfCommunities[]
@@ -34,34 +34,34 @@ model Community {
 }
 
 model Discussion {
-  authorHandle String
-  body         String?
-  communityUrl String
-  createdAt    DateTime  @default(now())
-  id           Int       @default(autoincrement()) @id
-  title        String
-  User         User      @relation(fields: [authorHandle], references: [handle])
-  Community    Community @relation(fields: [communityUrl], references: [url])
-  Comment      Comment[]
+  authorId    Int
+  body        String?
+  communityId Int
+  createdAt   DateTime  @default(now())
+  id          Int       @default(autoincrement()) @id
+  title       String
+  User        User      @relation(fields: [authorId], references: [id])
+  Community   Community @relation(fields: [communityId], references: [id])
+  Comment     Comment[]
 }
 
 model Message {
-  authorHandle         String
+  authorId             Int
   createdAt            DateTime               @default(now())
   id                   Int                    @default(autoincrement()) @id
-  recipientHandle      String
+  recipientId          Int
   text                 String
-  Author               User                   @relation("AuthorsOfMessages", fields: [authorHandle], references: [handle])
-  Recipient            User                   @relation("RecipientsOfMessages", fields: [recipientHandle], references: [handle])
+  Author               User                   @relation("AuthorsOfMessages", fields: [authorId], references: [id])
+  Recipient            User                   @relation("RecipientsOfMessages", fields: [recipientId], references: [id])
   AuthorsOfMessages    AuthorsOfMessages[]
   RecipientsOfMessages RecipientsOfMessages[]
 }
 
 model User {
-  id                       Int                        @default(autoincrement()) @id
   age                      Int?
   createdAt                DateTime                   @default(now())
   email                    String                     @unique
+  id                       Int                        @default(autoincrement()) @id
   name                     String
   handle                   String                     @unique
   Comment                  Comment[]
@@ -82,37 +82,37 @@ enum Role {
 }
 
 model SubscribersOfCommunities {
-  Community    Community @relation(fields: [communityUrl], references: [url])
-  communityUrl String
-  User         User      @relation(fields: [userHandle], references: [handle])
-  userHandle   String
-  createdAt    DateTime  @default(now())
-  @@id([communityUrl, userHandle])
+  Community   Community @relation(fields: [communityId], references: [id])
+  communityId Int
+  User        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  createdAt   DateTime  @default(now())
+  @@id([communityId, userId])
 }
 
 model CreatorsOfCommunities {
-  Community    Community @relation(fields: [communityUrl], references: [url])
-  communityUrl String
-  User         User      @relation(fields: [userHandle], references: [handle])
-  userHandle   String
-  createdAt    DateTime  @default(now())
-  @@id([communityUrl, userHandle])
+  Community   Community @relation(fields: [communityId], references: [id])
+  communityId Int
+  User        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  createdAt   DateTime  @default(now())
+  @@id([communityId, userId])
 }
 
 model AuthorsOfMessages {
-  Message    Message  @relation(fields: [messageId], references: [id])
-  messageId  Int
-  User       User     @relation(fields: [userHandle], references: [handle])
-  userHandle String
-  createdAt  DateTime @default(now())
-  @@id([messageId, userHandle])
+  Message   Message  @relation(fields: [messageId], references: [id])
+  messageId Int
+  User      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+  @@id([messageId, userId])
 }
 
 model RecipientsOfMessages {
-  Message    Message  @relation(fields: [messageId], references: [id])
-  messageId  Int
-  User       User     @relation(fields: [userHandle], references: [handle])
-  userHandle String
-  createdAt  DateTime @default(now())
-  @@id([messageId, userHandle])
+  Message   Message  @relation(fields: [messageId], references: [id])
+  messageId Int
+  User      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+  @@id([messageId, userId])
 }
