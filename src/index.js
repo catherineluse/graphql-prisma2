@@ -560,10 +560,23 @@ app.get(
   }
 );
 
-// Get descendant comments of a comment (children
-// and grandchildren).
-
 // Get all comments authored by user
+app.get(`/u/:handle/comments`, async (req, res) => {
+  const { handle } = req.params;
+
+  const comments = await prisma.user
+    .findOne({
+      where: {
+        handle,
+      },
+    })
+    .Comment()
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  res.json(comments);
+});
 
 // Get comments and discussions authored by user
 
