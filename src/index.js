@@ -516,8 +516,32 @@ app.get(`/c/:communityUrl/discussion/:discussionId`, async (req, res) => {
 });
 
 // Update comment
+app.put(
+  `/c/:communityUrl/discussions/:discussionId/comment/:commentId`,
+  async (req, res) => {
+    const { commentId } = req.params;
+    const { text } = req.body;
+
+    const updatedComment = await prisma.comment
+      .update({
+        where: {
+          id: parseInt(commentId),
+        },
+        data: {
+          text,
+        },
+      })
+      .catch((error) => {
+        res.send(error.message);
+      });
+
+    res.json(updatedComment);
+  }
+);
 
 // Delete comment
+
+// Get child comments of parent comment
 
 // Get descendant comments of a comment (children
 // and grandchildren).
