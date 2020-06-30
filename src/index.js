@@ -293,10 +293,7 @@ app.get(`/c/:url/discussions`, async (req, res) => {
   res.json(discussions);
 });
 
-// Get discussions authored by a user
-app.get(`/u/:handle/discussions`, async (req, res) => {
-  const { handle } = req.params;
-
+const getDiscussionsByUser = async (handle) => {
   const discussions = await prisma.user
     .findOne({
       where: {
@@ -307,6 +304,15 @@ app.get(`/u/:handle/discussions`, async (req, res) => {
     .catch((error) => {
       res.send(error.message);
     });
+
+  return discussions;
+};
+
+// Get discussions authored by a user
+app.get(`/u/:handle/discussions`, async (req, res) => {
+  const { handle } = req.params;
+
+  const discussions = await getDiscussionsByUser(handle);
 
   res.json(discussions);
 });
@@ -341,8 +347,8 @@ app.post(`/u/:recipientHandle/message`, async (req, res) => {
   res.json(newMessage);
 });
 
-const sortMessages = (messages) => {
-  return messages.sort((a, b) => b.createdAt - a.createdAt);
+const sortByCreated = (object) => {
+  return object.sort((a, b) => b.createdAt - a.createdAt);
 };
 
 // Get all correspondence to and from one user
@@ -366,7 +372,7 @@ app.get(`/u/:handle/message`, async (req, res) => {
       res.send(error.message);
     });
 
-  const chronologicalMessages = sortMessages(sentAndReceivedMessages);
+  const chronologicalMessages = sortByCreated(sentAndReceivedMessages);
   res.json(chronologicalMessages);
 });
 
@@ -409,7 +415,7 @@ app.get(`/u/:handle/message/:interlocutor`, async (req, res) => {
     });
 
   const conversation = [...messagesToInterlocutor, ...messagesFromInterlocutor];
-  const chronologicalConversation = sortMessages(conversation);
+  const chronologicalConversation = sortByCreated(conversation);
 
   res.json(chronologicalConversation);
 });
@@ -560,10 +566,7 @@ app.get(
   }
 );
 
-// Get all comments authored by user
-app.get(`/u/:handle/comments`, async (req, res) => {
-  const { handle } = req.params;
-
+const getCommentsByUser = async (handle) => {
   const comments = await prisma.user
     .findOne({
       where: {
@@ -575,12 +578,28 @@ app.get(`/u/:handle/comments`, async (req, res) => {
       res.send(error.message);
     });
 
+  return comments;
+};
+
+// Get all comments authored by user
+app.get(`/u/:handle/comments`, async (req, res) => {
+  const { handle } = req.params;
+
+  const comments = await getCommentsByUser(handle);
+
   res.json(comments);
 });
 
 // Get comments and discussions authored by user
+app.get(`/u/:handle/history`, async (req, res) => {
+  const { handle } = req.params;
+  const comments = await getCommentsByUser(handle);
+  const discussions = await getDiscussionsByUser(handle);
 
-// Delete comment
+  const history = [...comments, ...discussions];
+  const chronologicalHistory = sortByCreated(history);
+  return res.json(chronologicalHistory);
+});
 
 const server = app.listen(3000, () =>
   console.log(
