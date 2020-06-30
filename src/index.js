@@ -539,9 +539,26 @@ app.put(
   }
 );
 
-// Delete comment
-
 // Get child comments of parent comment
+app.get(
+  `/c/:communityUrl/discussions/:discussionId/comment/:commentId/children`,
+  async (req, res) => {
+    const { commentId } = req.params;
+
+    const updatedComment = await prisma.comment
+      .findOne({
+        where: {
+          id: parseInt(commentId),
+        },
+      })
+      .childComment()
+      .catch((error) => {
+        res.send(error.message);
+      });
+
+    res.json(updatedComment);
+  }
+);
 
 // Get descendant comments of a comment (children
 // and grandchildren).
@@ -549,6 +566,8 @@ app.put(
 // Get all comments authored by user
 
 // Get comments and discussions authored by user
+
+// Delete comment
 
 const server = app.listen(3000, () =>
   console.log(
