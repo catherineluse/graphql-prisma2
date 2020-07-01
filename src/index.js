@@ -317,6 +317,56 @@ app.get(`/u/:handle/discussions`, async (req, res) => {
   res.json(discussions);
 });
 
+// Update a discussion
+app.put(`/c/:communityUrl/discussions/:discussionId`, async (req, res) => {
+  const { discussionId } = req.params;
+
+  const updatedDiscussion = await prisma.discussion
+    .update({
+      where: {
+        id: parseInt(discussionId),
+      },
+      data: {
+        ...req.body,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  res.json(updatedDiscussion);
+});
+
+// Delete a discussion and all of its comments
+app.delete(`/c/:communityUrl/discussions/:discussionId`, async (req, res) => {
+  const { discussionId } = req.params;
+
+  const deletedCommentCount = await prisma.comment
+    .deleteMany({
+      where: {
+        Discussion: {
+          id: parseInt(discussionId),
+        },
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  const deletedDiscussion = await prisma.discussion
+    .delete({
+      where: {
+        id: parseInt(discussionId),
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+  res.send(
+    `Deleted ${deletedCommentCount.count} comments discussion ${deletedDiscussion.id} and deleted the discussion`
+  );
+});
+
 // MESSAGES
 
 // Create a message from one user to another
@@ -572,7 +622,7 @@ const getRepliesToComment = async (commentId) => {
 
 // Get child comments of parent comment
 app.get(
-  `/c/:communityUrl/discussions/:discussionId/comment/:commentId/children`,
+  `/c/:communityUrl/discussions/:discussionId/comment/:commentId/replies`,
   async (req, res) => {
     const { commentId } = req.params;
     const replies = await getRepliesToComment(commentId);
