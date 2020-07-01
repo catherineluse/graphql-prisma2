@@ -1,0 +1,17 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "UpdateField",
+      "model": "Comment",
+      "field": "User",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Comment",
+      "field": "authorHandle",
+      "arity": "Optional"
+    }
+  ]
+}

@@ -430,6 +430,11 @@ app.post("/c/:communityUrl/discussion/:discussionId", async (req, res) => {
   const { authorHandle, text, isRootComment } = req.body;
   const { discussionId } = req.params;
 
+  if (!authorHandle) {
+    res.send("An author handle is required to create a comment.");
+    return;
+  }
+
   const comment = await prisma.comment
     .create({
       data: {
@@ -463,6 +468,11 @@ app.post(
   async (req, res) => {
     const { authorHandle, text, isRootComment } = req.body;
     const { discussionId, commentId } = req.params;
+
+    if (!authorHandle) {
+      res.send("An author handle is required to create a comment.");
+      return;
+    }
 
     const comment = await prisma.comment
       .create({
@@ -521,7 +531,7 @@ app.get(`/c/:communityUrl/discussion/:discussionId`, async (req, res) => {
   res.json(discussion);
 });
 
-// Update comment
+// Update comment text
 app.put(
   `/c/:communityUrl/discussions/:discussionId/comment/:commentId`,
   async (req, res) => {
@@ -545,27 +555,30 @@ app.put(
   }
 );
 
+const getRepliesToComment = async (commentId) => {
+  const replies = await prisma.comment
+    .findOne({
+      where: {
+        id: parseInt(commentId),
+      },
+    })
+    .childComment()
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  return replies;
+};
+
 // Get child comments of parent comment
 app.get(
   `/c/:communityUrl/discussions/:discussionId/comment/:commentId/children`,
   async (req, res) => {
     const { commentId } = req.params;
-
-    const updatedComment = await prisma.comment
-      .findOne({
-        where: {
-          id: parseInt(commentId),
-        },
-      })
-      .childComment()
-      .catch((error) => {
-        res.send(error.message);
-      });
-
-    res.json(updatedComment);
+    const replies = await getRepliesToComment(commentId);
+    res.json(replies);
   }
 );
-
 const getCommentsByUser = async (handle) => {
   const comments = await prisma.user
     .findOne({
@@ -595,11 +608,57 @@ app.get(`/u/:handle/history`, async (req, res) => {
   const { handle } = req.params;
   const comments = await getCommentsByUser(handle);
   const discussions = await getDiscussionsByUser(handle);
-
   const history = [...comments, ...discussions];
   const chronologicalHistory = sortByCreated(history);
   return res.json(chronologicalHistory);
 });
+
+// Delete a comment
+app.delete(
+  `/c/:communityUrl/discussions/:discussionId/comment/:commentId`,
+  async (req, res) => {
+    const { commentId } = req.params;
+
+    // Check if comment has replies. If there are replies,
+    // replace the comment with a placeholder.
+    const replies = await getRepliesToComment(commentId);
+    if (replies.length > 0) {
+      const updatedComment = await prisma.comment
+        .update({
+          where: {
+            id: parseInt(commentId),
+          },
+          data: {
+            text: "[Deleted]",
+            User: {
+              connect: {
+                handle: "deleted",
+              },
+            },
+          },
+        })
+        .catch((error) => {
+          res.send(error.message);
+        });
+
+      res.json(updatedComment);
+      return;
+    }
+
+    // If there are no replies, delete the comment.
+    const deletedComment = await prisma.comment
+      .delete({
+        where: {
+          id: parseInt(commentId),
+        },
+      })
+      .catch((error) => {
+        res.send(error.message);
+      });
+
+    res.json(deletedComment);
+  }
+);
 
 const server = app.listen(3000, () =>
   console.log(
