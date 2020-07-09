@@ -245,18 +245,62 @@ app.get(`/c/:url`, async (req, res) => {
   res.json(result);
 });
 
+// Delete community
+app.delete(`/c/:url`, async (req, res) => {
+  const { url } = req.params;
+
+  // Delete all comments in all discussions in the community
+  const deletedComments = await prisma.comment
+    .deleteMany({
+      where: {
+        Discussion: {
+          communityUrl: url,
+        },
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  // Delete all discussions in the community
+  const deletedDiscussions = await prisma.discussion
+    .deleteMany({
+      where: {
+        communityUrl: url,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  // Delete the community
+  await prisma.community
+    .delete({
+      where: {
+        url,
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  res.send(
+    `Deleted the community ${url} along with ${deletedComments.count} comments and ${deletedDiscussions.count} discussions`
+  );
+});
+
 // DISCUSSIONS
 
 // Create a discussion in a community
 app.post(`/c/:url/discussions`, async (req, res) => {
-  const { authorId, body, communityId, title } = req.body;
+  const { authorId, body, title } = req.body;
 
   const newDiscussion = await prisma.discussion
     .create({
       data: {
         Community: {
           connect: {
-            id: parseInt(communityId),
+            url,
           },
         },
         title,
@@ -337,31 +381,41 @@ app.put(`/c/:communityUrl/discussions/:discussionId`, async (req, res) => {
   res.json(updatedDiscussion);
 });
 
-// Delete a discussion and all of its comments
-app.delete(`/c/:communityUrl/discussions/:discussionId`, async (req, res) => {
-  const { discussionId } = req.params;
-
+const deleteCommentsInDiscussion = async (discussionId) => {
   const deletedCommentCount = await prisma.comment
     .deleteMany({
       where: {
         Discussion: {
-          id: parseInt(discussionId),
+          id: discussionId,
         },
       },
     })
     .catch((error) => {
       res.send(error.message);
     });
+};
 
+const deleteDiscussion = async (discussionId) => {
   const deletedDiscussion = await prisma.discussion
     .delete({
       where: {
-        id: parseInt(discussionId),
+        id: discussionIdInt,
       },
     })
     .catch((error) => {
       res.send(error.message);
     });
+};
+
+// Delete a discussion and all of its comments
+app.delete(`/c/:communityUrl/discussions/:discussionId`, async (req, res) => {
+  const { discussionId } = req.params;
+  const discussionIdInt = parseInt(discussionId);
+
+  const deletedCommentCount = await deleteCommentsInDiscussion(discussionIdInt);
+
+  const deletedDiscussion = await deleteDiscussion(discussionIdInt);
+
   res.send(
     `Deleted ${deletedCommentCount.count} comments discussion ${deletedDiscussion.id} and deleted the discussion`
   );
