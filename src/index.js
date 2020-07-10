@@ -66,15 +66,39 @@ app.post(`/u/:handle`, async (req, res) => {
     })
     .catch((error) => {
       res.send(error.message);
+      return;
     });
 
   res.json(updatedUser);
 });
 
-// Delete user
+// Delete user and delete discussions and comments
+// authored by the user.
 app.delete(`/u/:handle`, async (req, res) => {
   const { handle } = req.params;
 
+  // For the comments authored by this user,
+  // replace them with [deleted].
+  await prisma.comment
+    .updateMany({
+      where: {
+        authorHandle: handle,
+      },
+      data: {
+        text: "[Deleted]",
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+      return;
+    });
+
+  // The discussions authored by the user are
+  // cascade deleted when the author is deleted,
+  // along with all the comments in those discussions.
+
+  // For the communities created by the user,
+  // the organizer is changed to null.
   const deletedUser = await prisma.user
     .delete({
       where: {
@@ -200,7 +224,7 @@ app.post(`/communities`, async (req, res) => {
 });
 
 // Update a community
-app.post(`/c/:url`, async (req, res) => {
+app.put(`/c/:url`, async (req, res) => {
   const { url } = req.params;
 
   const result = await prisma.community
@@ -294,6 +318,7 @@ app.delete(`/c/:url`, async (req, res) => {
 // Create a discussion in a community
 app.post(`/c/:url/discussions`, async (req, res) => {
   const { authorId, body, title } = req.body;
+  const { url } = req.params;
 
   const newDiscussion = await prisma.discussion
     .create({
@@ -323,16 +348,20 @@ app.post(`/c/:url/discussions`, async (req, res) => {
 app.get(`/c/:url/discussions`, async (req, res) => {
   const { url } = req.params;
 
-  const discussions = await prisma.community
-    .findOne({
+  const discussions = await prisma.discussion
+    .findMany({
       where: {
-        url,
+        communityUrl: url,
       },
     })
-    .Discussion()
     .catch((error) => {
       res.send(error.message);
     });
+
+  if (discussions === null) {
+    res.send("Could not find discussions.");
+    return;
+  }
 
   res.json(discussions);
 });
@@ -608,7 +637,7 @@ app.post(
   }
 );
 
-// Get discussion with structured comments
+// Get discussion with nested comments
 app.get(`/c/:communityUrl/discussion/:discussionId`, async (req, res) => {
   const { discussionId } = req.params;
 
@@ -663,7 +692,7 @@ const getRepliesToComment = async (commentId) => {
   const replies = await prisma.comment
     .findOne({
       where: {
-        id: parseInt(commentId),
+        id: commentId,
       },
     })
     .childComment()
@@ -717,35 +746,42 @@ app.get(`/u/:handle/history`, async (req, res) => {
   return res.json(chronologicalHistory);
 });
 
+const replaceCommentTextWithDeleted = async (commentId) => {
+  const updatedComment = await prisma.comment
+    .update({
+      where: {
+        id: parseInt(commentId),
+      },
+      data: {
+        text: "[Deleted]",
+        User: {
+          connect: {
+            handle: "deleted",
+          },
+        },
+      },
+    })
+    .catch((error) => {
+      res.send(error.message);
+    });
+
+  return updatedComment;
+};
+
 // Delete a comment
 app.delete(
   `/c/:communityUrl/discussions/:discussionId/comment/:commentId`,
   async (req, res) => {
     const { commentId } = req.params;
+    const commentIdInt = parseInt(commentId);
 
     // Check if comment has replies. If there are replies,
     // replace the comment with a placeholder.
-    const replies = await getRepliesToComment(commentId);
-    if (replies.length > 0) {
-      const updatedComment = await prisma.comment
-        .update({
-          where: {
-            id: parseInt(commentId),
-          },
-          data: {
-            text: "[Deleted]",
-            User: {
-              connect: {
-                handle: "deleted",
-              },
-            },
-          },
-        })
-        .catch((error) => {
-          res.send(error.message);
-        });
+    const replies = await getRepliesToComment(commentIdInt);
 
-      res.json(updatedComment);
+    if (replies.length > 0) {
+      await replaceCommentTextWithDeleted(commentIdInt);
+      res.send(`Replaced comment ${commentIdInt} with [deleted]`);
       return;
     }
 

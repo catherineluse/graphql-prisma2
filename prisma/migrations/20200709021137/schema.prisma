@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Comment {
@@ -36,13 +36,13 @@ model Community {
 }
 
 model Discussion {
-  authorHandle String?
+  authorHandle String
   body         String?
   communityUrl String
   createdAt    DateTime  @default(now())
   id           Int       @default(autoincrement()) @id
   title        String
-  User         User?      @relation(fields: [authorHandle], references: [handle])
+  User         User      @relation(fields: [authorHandle], references: [handle])
   Community    Community @relation(fields: [communityUrl], references: [url])
   Comment      Comment[]
 }
